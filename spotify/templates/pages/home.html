@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="{{url_for('static',filename='scripts.js')}}"></script>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spotify Playlist App</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='src/output.css') }}">
+</head>
+<body onload="
+  get_date();
+  auth();  
+  ">
+  <div id="loading_spinner" style="visibility:hidden" role="status" class="z-10 absolute -translate-x-1/2 -translate-y-1/2 top-2/4 left-1/2">
+    <svg aria-hidden="true" class="w-10 h-10 text-gray-200 animate-spin dark:text-gray-600 fill-blue-400" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/><path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/></svg>
+    <span class="sr-only">Loading...</span>
+  </div>
+  <div id="blur" class="">   
+    <div class="z-0 bg-[url('/static/src/images/background.jpg')] bg-cover bg-center bg-opacity-50 min-h-screen min-w-screen max-h-screen max-w-screen"></div> 
+    <div class="z-10 bg-stone-200/70 min-h-screen min-w-screen max-h-screen max-w-screen absolute flex justify-center items-center inset-0">    
+      <div class="inset-0 p-4 grid grid-cols-5 grid-rows-min gap-10 mx-auto justify-center items-center place-items-center">
+        <button id="locate_me" onclick="locate()" 
+          class="col-start-3 row-start-2 group flex items-center justify-start w-11 h-11 bg-blue-500 rounded-full cursor-pointer relative overflow-hidden transition-all duration-200 shadow-lg hover:w-48 hover:rounded-lg active:translate-x-5 active:translate-y-1"
+        >
+          <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-full transition-all duration-300 group-hover:justify-start group-hover:px-3">
+            <svg class="group-hover:animate-spin" xmlns="http://www.w3.org/2000/svg" width="30" height="30" stroke-width="0.5" stroke="#eff6ff" fill="#eff6ff" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.944 12.979c-.489 4.509-4.306 8.021-8.944 8.021-2.698 0-5.112-1.194-6.763-3.075l1.245-1.633c1.283 1.645 3.276 2.708 5.518 2.708 3.526 0 6.444-2.624 6.923-6.021h-2.923l4-5.25 4 5.25h-3.056zm-15.864-1.979c.487-3.387 3.4-6 6.92-6 2.237 0 4.228 1.059 5.51 2.698l1.244-1.632c-1.65-1.876-4.061-3.066-6.754-3.066-4.632 0-8.443 3.501-8.941 8h-3.059l4 5.25 4-5.25h-2.92z"/></svg>
+          </div>
+          <div
+            class="absolute right-5 transform translate-x-full opacity-0 text-white text-lg font-semibold transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100"
+          >
+            Refresh Page
+          </div>
+        </button>
+
+        </button>
+        <div class="col-span-5 row-start-3 w-[300px] aspect-video rounded-lg flex flex-col items-center justify-center gap-2 group">
+          <div class="flex flex-col items-center p-4 rounded-xl w-full sm:px-12 bg-white/50 backdrop-blur-[2px] text-slate-600 shadow-lg">
+            <div class="text-center">
+              <h2 id="city_state" class="text-xl font-semibold">Home City</h2>
+              <p id="date" class="text-sm text-slate-400 italic">01/01/2024</p>
+            </div>
+            <img id="animation" src="static/src/images/clear-day.svg" alt="clear sunny day animation"></img>          
+            <div id="temp" class="mb-2 text-3xl font-semibold">
+              74°F<span class="mx-1 font-normal">/</span>23°F
+            </div>
+            <p id="weather_desc" class="text-gray-400">Sunny</p>
+          </div>
+        </div>
+        <div class="col-span-5 row-start-4 flex flex-row space-x-6">
+          <div class="transform transition duration-300 hover:scale-110 rounded-lg shadow-lg h-60 w-60 hover:shadow-xl bg-white/50 backdrop-blur-[2px]">
+            <div id="playlist1_frame" class="m-2 h-44 rounded-lg overflow-hidden">
+              <img id="playlist1_img" class="h-full w-full object-cover" src="/static/src/images/blue.jpg" alt=""></img>
+            </div>
+            <div class="px-5 pt-2 flex flex-col justify-center items-center">
+              <h2 id="playlist1_name" class="font-semibold text-slate-600 text-md truncate">Playlist 1</h2>
+              <a id="playlist1_link" href="https://spotify.com" target="_blank">
+                <button id="playlist1_button" style="visibility:hidden"
+                  class="bg-blue-500 cursor-pointer text-white px-4 py-1 mt-2 rounded-md transition duration-150 hover:bg-blue-700"
+                  type="button">
+                  Check Out This Playlist
+                </button>
+              </a>
+            </div>
+          </div>
+          <div class="transform transition duration-300 hover:scale-110 rounded-lg shadow-lg h-60 w-60 hover:shadow-xl bg-white/50 backdrop-blur-[2px]">
+            <div id="playlist2_frame" class="m-2 h-44 rounded-lg overflow-hidden">
+              <img id="playlist2_img" class="h-full w-full object-cover" src="/static/src/images/pink.jpg" alt=""></img>
+            </div>
+            <div class="px-5 pt-2 flex flex-col justify-center items-center">
+              <h2 id="playlist2_name" class="font-semibold text-slate-600 text-md truncate">Playlist 2</h2>
+              <a id="playlist2_link" href="https://spotify.com" target="_blank">
+                <button id="playlist2_button" style="visibility:hidden"
+                  class="bg-blue-500 cursor-pointer text-white px-4 py-1 mt-2 rounded-md transition duration-150 hover:bg-blue-700"
+                  type="button">
+                  Check Out This Playlist
+                </button>
+              </a>
+            </div>
+          </div>
+          <div class="transform transition duration-300 hover:scale-110 rounded-lg shadow-lg h-60 w-60 hover:shadow-xl bg-white/50 backdrop-blur-[2px]">
+            <div id="playlist3_frame" class="m-2 h-44 rounded-lg overflow-hidden">
+              <img id="playlist3_img" class="h-full w-full object-cover" src="/static/src/images/red.jpg" alt=""></img>
+            </div>
+            <div class="px-5 pt-2 flex flex-col justify-center items-center">
+              <h2 id="playlist3_name" class="font-semibold text-slate-600 text-md truncate">Playlist 3</h2>
+              <a id="playlist3_link" href="https://spotify.com" target="_blank">
+                <button id="playlist3_button" style="visibility:hidden"
+                  class="bg-blue-500 cursor-pointer text-white px-4 py-1 mt-2 rounded-md transition duration-150 hover:bg-blue-700"
+                  type="button">
+                Check Out This Playlist
+                </button>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
