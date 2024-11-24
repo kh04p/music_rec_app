@@ -1,0 +1,1 @@
+from music_rec_app import app
